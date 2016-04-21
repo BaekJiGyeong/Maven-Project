@@ -4,10 +4,13 @@
 				
 <configuration>
 
-	<!-- 이제 com.ktds.jgbaek.vo.EmployeesVO대신 EmployeeVO써도 알아서 패키지를 찾아간다. -->
-	<!-- 다른데서 EmployeeVO를 쓰면 제일먼저 별칭이 있나 찾아준다. -->
-	
+	<typeAliases>
+		<typeAlias type="com.ktds.jgbaek.article.vo.ArticleVO" alias="ArticleVO"/>
+		<typeAlias type="com.ktds.jgbaek.article.vo.ArticleSearchVO" alias="ArticleSearchVO"/>
+	</typeAliases>
+
+	<!-- 이 파일에서 query문을 가져온다. -->
 	<mappers>
-		<mapper resource="/sampleMapper.xml"/>
+		<mapper resource="/com/ktds/jgbaek/article/dao/impl/sql/articleDAO.xml"/>
 	</mappers>
 </configuration>

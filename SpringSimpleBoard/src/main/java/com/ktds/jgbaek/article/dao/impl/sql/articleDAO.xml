@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "=//mybatis.org//DTD Mapper 3.0//EN"
+					"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ArticleDAO">
+
+	<select id="nextArticleSeq" resultType="_int">
+		SELECT	ARTICLE_ID_SEQ.NEXTVAL
+		FROM	DUAL
+	</select>
+	
+	<select id="nowDate" resultType="string">
+		SELECT	TO_CHAR( SYSDATE, 'YYYYMMDD' )
+		FROM	DUAL
+	</select>
+	
+
+	<insert id="insertNewArticle" parameterType="ArticleVO">
+		INSERT INTO ARTICLE (
+								ARTICLE_ID /* AR-20160421-000001 */
+								, ARTICLE_NUMBER /* 1 */
+								, SUBJECT
+								, DESCRIPTION
+								, WRITER
+								, CREATED_DATE
+								, MODIFIED_DATE
+							) 
+		VALUES 				( 
+								#{articleId}
+								, #{articleNumber}
+								, #{subject}
+								, #{description}
+								, #{writer}
+								, SYSDATE
+								, SYSDATE
+							)
+	</insert>
+	
+	
+	<select id="getTotalArticleCount" resultType="_int">
+		SELECT	COUNT(ARTICLE_ID)
+		FROM ARTICLE
+	</select>
+	
+	<select id="getAllArticle" parameterType="ArticleSearchVO" resultType="ArticleVO">
+		SELECT	ARTICLE_ID articleId
+				, ARTICLE_NUMBER articleNumber
+				, SUBJECT subject
+				, DESCRIPTION description
+				, WRITER writer
+				, CREATED_DATE createdDate
+				, MODIFIED_DATE modifiedDate
+		FROM	(
+					SELECT	ROWNUM AS RNUM
+							, ARTICLE.*
+					FROM	(
+								SELECT	*
+								FROM	ARTICLE
+								ORDER	BY ARTICLE_ID DESC
+							) ARTICLE
+					WHERE	ROWNUM <![CDATA[<=]]> #{endIndex}
+				)
+		WHERE	ROWNUM <![CDATA[>=]]> #{startIndex}
+	</select>
+	
+	<select id="getOneArticle" parameterType="string" resultType="ArticleVO">
+		SELECT	ARTICLE_ID articleId
+				, ARTICLE_NUMBER articleNumber
+				, SUBJECT subject
+				, DESCRIPTION description
+				, WRITER writer
+				, CREATED_DATE createdDate
+				, MODIFIED_DATE modifiedDate
+		FROM	ARTICLE
+		WHERE	ARTICLE_ID = #{articleId}
+	</select>
+	
+	<delete id="deleteArticle" parameterType="string">
+		DELETE 
+		FROM   ARTICLE
+		WHERE  ARTICLE_ID = #{articleId}
+	</delete>
+	
+	<update id="doModifyAction" parameterType="ArticleVO">
+		UPDATE ARTICLE
+		SET    SUBJECT        = #{subject},
+		       DESCRIPTION    = #{description},
+		       WRITER         = #{writer},
+		       MODIFIED_DATE  = SYSDATE
+		WHERE  ARTICLE_ID     = #{articleId}
+	</update>
+
+</mapper>
