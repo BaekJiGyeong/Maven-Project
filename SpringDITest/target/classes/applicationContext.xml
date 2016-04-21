@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+	<!--  LoginDAOImpl loginDAO = new LoginDAOImpl(); -->
+	<bean id="loginDAO"
+			class="com.ktds.jgbaek.LoginDAOImpl"></bean>
+
+	<!--  LoginBizImpl loginBiz = new LoginBizImpl(); -->
+	<bean id="loginBiz"
+			class="com.ktds.jgbaek.LoginBizimpl">
+			
+			<!-- loginBiz.setLoginDAO(loginDAO) -->
+			<property name="loginDAO" ref="loginDAO"></property>
+			</bean>
+
+</beans>
