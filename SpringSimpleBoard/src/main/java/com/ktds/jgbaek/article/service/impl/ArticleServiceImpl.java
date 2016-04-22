@@ -99,7 +99,6 @@ public class ArticleServiceImpl implements ArticleService {
 	@Override
 	public ModelAndView doModifyAction(ArticleVO articleVO, Errors errors) {
 		ModelAndView view = new ModelAndView();
-		String articleId = articleVO.getArticleId();
 		if (errors.hasErrors()) {
 			view.setViewName("article/modify");
 			view.addObject("articleVO", articleVO);

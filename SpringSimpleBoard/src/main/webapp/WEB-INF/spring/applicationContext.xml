@@ -8,6 +8,8 @@
 	<mvc:annotation-driven/>
 	
 	
+	<mvc:resources location="/WEB-INF/resources/js/" mapping="/js/**"/>
+	
 	<!-- RequestDispatcher. forward("member/login/login.jsp") -->
 	<bean id="viewResolver"
 			class="org.springframework.web.servlet.view.InternalResourceViewResolver">
@@ -32,6 +34,9 @@
 			class="com.ktds.jgbaek.article.web.ArticleController">
 		<property name="articleService" ref="articleService"/>		
 	</bean>
+	
+	<bean id="socketController" 
+			class="com.ktds.jgbaek.handler.socket.web.SocketController"/>
 			
 	
 
