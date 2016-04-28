@@ -1,0 +1,125 @@
+@CHARSET "UTF-8";
+
+body {
+	margin: 0px;
+	padding: 0px;
+	padding-bottom: 50px;
+}
+
+* {
+	font-size: 9pt;
+	color: #333;
+	font-family: "나눔바른고딕", "고딕"
+}
+
+a {
+	text-decoration: none;
+}
+
+a.white:hover {
+	text-decoration: underline;
+	font-weight: bold;
+}
+
+a.white {
+	color: #FFF; 
+}
+
+div.login {
+	padding-top: 15px;
+	height: 41px;
+	background-image: url("/HuCloud/resources/img/background.png");
+}
+
+div.login div.wrapper {
+	text-align: right;
+	color: #F3F3F4;
+	padding-right: 15px;
+}
+
+div.login div.wrapper input {
+	border: 1px solid #333;
+	padding-left: 10px;
+	width: 100px;
+	height: 23px;
+}
+
+div.wrapper {
+	max-width: 1000px;
+	min-width: 500px;
+}
+
+span.link {
+	cursor: pointer;
+}
+
+span.button {
+	padding: 5px;
+	color: #FFF;
+	cursor: pointer;
+}
+
+span.loginButton {
+	background-color: #ffae5e;
+	border: none;
+}
+
+span.registButton {
+	background-color: #5e7aff;
+	border: none;
+}
+
+div.register {
+	position:absolute;
+	width: 170px;
+	height: 170px;
+	z-index: 2;
+	padding: 20px;
+	background-color: #f3f3f4;
+	border: 5px solid #CCC;
+	border-radius: 25px;
+}
+
+div.register input {
+	border: 1px solid #333;
+	padding-left: 10px;
+	width: 150px;
+	height: 23px;
+}
+
+div.blockDiv {
+	position:absolute;
+	top : 0px;
+	left: 0px;
+	z-index: 1;
+	background-color: black;
+}
+
+div.spacer {
+	height: 10px;
+}
+
+div.w-spacer {
+	min-width: 10px;
+	float: left;
+}
+
+div.tooltip {
+	background-color: #ffff71;
+	border: 1px solid #d5d500;
+	border-radius: 10px; 
+	padding: 5px 10px;
+	position:absolute;
+	z-index: 1;
+}
+
+div.clear {
+	clear: both;
+}
+
+div.result {
+	padding: 10px;
+	margin-bottom: 10px;
+	background-color: #ffd2bd;
+	border: 1px solid #ff8040;
+}

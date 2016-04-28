@@ -89,10 +89,6 @@ public class ArticleBizImpl implements ArticleBiz {
 		String nowDate = articleDAO.nowDate();
 		articleVO.setCreatedDate(nowDate);
 		
-		
 		return articleDAO.doModifyAction(articleVO) >0 ;
 	}
-
-	
-	
 }

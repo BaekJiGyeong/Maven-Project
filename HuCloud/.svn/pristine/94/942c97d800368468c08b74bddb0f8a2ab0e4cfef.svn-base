@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BoardDAO">
+    
+    <resultMap type="boardVO" id="getBoardByIdMap">
+        <id property="id" column="ID" /> 
+        <result property="subject" column="SUBJECT"/>
+        <result property="content" column="CONTENT"/>
+        <result property="userId" column="USER_ID"/>
+        <result property="createdDate" column="CRT_DT"/>
+        <result property="modifiedDate" column="MDFY_DT"/>
+        <result property="hit" column="HIT"/>
+        <result property="recommend" column="RECOMMEND"/>
+        <result property="userName" column="USER_NAME"/>
+        <result property="fileName" column="FILE_NAME"/>
+    </resultMap>
+    
+    <select id="getBoardById" parameterType="string" resultMap="getBoardByIdMap">
+        SELECT	ID
+			    , SUBJECT
+			    , CONTENT  
+				, BOARD.USER_ID
+				, TO_CHAR(BOARD.CRT_DT, 'YYYY-MM-DD HH24:MI:SS') CRT_DT
+				, TO_CHAR(BOARD.MDFY_DT, 'YYYY-MM-DD HH24:MI:SS') MDFY_DT  
+				, HIT
+				, RECOMMEND
+				, USERS.USER_NAME 
+				, BOARD.FILE_NAME
+		FROM	SYSTEM.BOARD
+				, SYSTEM.USERS 
+		WHERE	BOARD.USER_ID = USERS.USER_ID  
+		AND		ID = #{id}
+    </select>
+    
+    <select id="getArticleCountInBoardByCondition"  parameterType="articleSearchVO" resultType="_int">
+        SELECT	COUNT(1)
+		FROM	SYSTEM.BOARD
+				, SYSTEM.USERS 
+		WHERE	BOARD.USER_ID = USERS.USER_ID
+		<if test="searchKeyword != null">
+		    <if test="searchKeyword != ''">
+		AND		BOARD.SUBJECT = #{searchKeyword}
+			</if>
+		</if>
+		ORDER	BY ID DESC
+    </select>
+    
+    <select id="getArticleInBoardByCondition" parameterType="articleSearchVO" resultMap="getBoardByIdMap">
+        SELECT	ID
+			    , SUBJECT
+			    , CONTENT  
+				, USER_ID
+				, TO_CHAR(CRT_DT, 'YYYY-MM-DD HH24:MI:SS') CRT_DT
+				, TO_CHAR(MDFY_DT, 'YYYY-MM-DD HH24:MI:SS') MDFY_DT
+				, HIT
+				, RECOMMEND
+				, USER_NAME 
+				, FILE_NAME
+        FROM	(
+			        SELECT	ROWNUM AS RNUM, A.*
+			        FROM	(
+						        SELECT	ID
+									    , SUBJECT
+									    , CONTENT  
+										, BOARD.USER_ID
+										, BOARD.CRT_DT
+										, BOARD.MDFY_DT  
+										, HIT
+										, RECOMMEND
+										, USERS.USER_NAME 
+										, BOARD.FILE_NAME
+								FROM	SYSTEM.BOARD
+										, SYSTEM.USERS 
+								WHERE	BOARD.USER_ID = USERS.USER_ID
+								<if test="searchKeyword != null">
+								    <if test="searchKeyword != ''">
+								AND		BOARD.SUBJECT = #{searchKeyword}
+									</if>
+								</if>
+								ORDER	BY ID DESC
+							) A
+					WHERE	ROWNUM &lt;= #{endNumber}
+				)
+		WHERE	RNUM >= #{startNumber}
+    </select>
+    
+    <update id="updateHit" parameterType="string">
+		UPDATE	SYSTEM.BOARD
+		SET		HIT = HIT + 1
+		WHERE	ID = #{id}
+    </update>
+    
+    <update id="updateRecommend" parameterType="string">
+		UPDATE	SYSTEM.BOARD
+		SET		RECOMMEND = RECOMMEND + 1
+		WHERE	ID = #{id}
+    </update>
+    
+    <insert id="insertArticleInBoard" parameterType="map">
+		INSERT INTO SYSTEM.BOARD (
+			ID
+			, SUBJECT
+			, CONTENT  
+			, USER_ID
+			, FILE_NAME
+			, CRT_DT
+			, MDFY_DT  
+			, HIT
+			, RECOMMEND)  
+		VALUES ( 
+			BOARD_ID_SEQ.NEXTVAL
+			, #{subject}
+			, #{content}
+			, #{userId}
+			, #{fileName}
+			, SYSDATE
+			, SYSDATE
+			, 0
+			, 0 ) 
+    </insert>
+    
+    <update id="modifyArticleInBoard" parameterType="map">
+        UPDATE	SYSTEM.BOARD
+        SET		SUBJECT = #{subject}
+        		, CONTENT = #{content}
+        		, FILE_NAME = #{fileName}
+        WHERE	ID = #{id}
+        AND		USER_ID = #{userId}
+    </update>
+    
+    <delete id="deleteArticle" parameterType="string">
+		DELETE	
+		FROM	BOARD
+		WHERE	ID = #{id}
+    </delete>
+</mapper>

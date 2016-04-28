@@ -1,0 +1,14 @@
+<addressBook>
+	<address>
+		<name>홍길동</name>
+		<password>1234</password>
+		<email>hong@korea.com</email>
+		<ccard>1234-5678-3322-9000</ccard>
+	</address>
+	<address>
+		<name>이순신</name>
+		<password>9876</password>
+		<email>lee@korea.com</email>
+		<ccard>9999-8888-9000-1234</ccard>
+	</address>
+</addressBook>

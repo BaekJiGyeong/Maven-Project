@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ReplyDAO">
+    
+    <resultMap type="replyVO" id="getReplyByBoardIdMap">
+        <id property="id" column="ID" /> 
+        <result property="boardId" column="BOARD_ID"/>
+        <result property="content" column="CONTENT"/>
+        <result property="userId" column="USER_ID"/>
+        <result property="userName" column="USER_NAME"/>
+        <result property="createdDate" column="CRT_DT"/>
+        <result property="modifiedDate" column="MDFY_DT"/>
+        <result property="recommend" column="RECOMMEND"/>
+    </resultMap>
+    
+    <select id="getReplyByBoardIdMap" parameterType="_int" resultMap="getReplyByBoardIdMap">
+        SELECT	ID
+        		, BOARD_ID
+        		, CONTENT
+        		, USERS.USER_ID
+        		, USERS.USER_NAME
+        		, TO_CHAR(REPLY.CRT_DT, 'YYYY-MM-DD HH24:MI:SS') CRT_DT
+        		, TO_CHAR(REPLY.MDFY_DT, 'YYYY-MM-DD HH24:MI:SS') MDFY_DT
+        		, RECOMMEND
+		FROM	SYSTEM.REPLY
+				, SYSTEM.USERS 
+		WHERE	REPLY.USER_ID = USERS.USER_ID  
+		AND		BOARD_ID = #{id}
+		ORDER	BY REPLY.ID ASC
+    </select>
+    
+    <select id="getReplyCountInBoardByCondition"  parameterType="_int" resultType="_int">
+        SELECT	COUNT(1)
+		FROM	SYSTEM.REPLY
+				, SYSTEM.USERS 
+		WHERE	REPLY.USER_ID = USERS.USER_ID
+		AND		BOARD_ID = #{boardId}
+		ORDER	BY ID DESC
+    </select>
+    
+    <insert id="insertReply" parameterType="replyVO">
+		INSERT INTO SYSTEM.REPLY (
+				ID
+				, BOARD_ID
+				, CONTENT
+				, USER_ID
+				, CRT_DT
+				, MDFY_DT
+				, RECOMMEND
+		) 
+		VALUES	( 
+			REPLY_ID_SEQ.NEXTVAL
+			, #{boardId}
+			, #{content}
+			, #{userId} 
+			, SYSDATE
+			, SYSDATE
+			, 0
+		) 
+    </insert>
+    
+    <update id="updateRecommend" parameterType="java.util.Map">
+        UPDATE	SYSTEM.REPLY
+        SET		RECOMMEND = RECOMMEND + 1
+        		, MDFY_DT = SYSDATE
+        WHERE	ID = #{id}
+        AND		BOARD_ID = #{boardId}
+    </update>
+    
+    <delete id="deleteReply" parameterType="string">
+        DELETE	
+        FROM	REPLY
+        WHERE	BOARD_ID = #{id}
+    </delete>
+</mapper>

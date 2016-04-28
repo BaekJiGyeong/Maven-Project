@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd">
+
+    <bean  id="dataSource" 
+	       class="com.mchange.v2.c3p0.ComboPooledDataSource"
+	       destroy-method="close">
+	    <property name="driverClass" value="oracle.jdbc.driver.OracleDriver" />
+	    <property name="jdbcUrl" value="jdbc:oracle:thin:@localhost:1521:XE" />
+	    <property name="user" value="SYSTEM" />
+	    <property name="password" value="wkdalsckd1" />
+	</bean>
+	
+    <bean   id="sqlSessionFactory"
+       		class="org.mybatis.spring.SqlSessionFactoryBean">
+	    <property name="dataSource" ref="dataSource" />
+	    <property name="configLocation" value="classpath:/mybatis.xml" />
+	</bean>
+	
+    <bean  id="sqlSessionTemplate"
+	       class="org.mybatis.spring.SqlSessionTemplate">
+	    <constructor-arg ref="sqlSessionFactory" />
+	</bean>
+	    
+    
+    <bean   id="transactionManager"
+	        class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+	    <property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+	    <tx:attributes>
+	        <tx:method name="set*" rollback-for="RuntimeException" />
+	        <tx:method name="add*" rollback-for="RuntimeException" />
+	        <tx:method name="update*" rollback-for="RuntimeException" />
+	        <tx:method name="modify*" rollback-for="RuntimeException" />
+	        <tx:method name="delete*" rollback-for="RuntimeException" />
+	        <tx:method name="remove*" rollback-for="RuntimeException" />
+	    </tx:attributes>
+	</tx:advice>
+	
+	<aop:config>
+	    <aop:pointcut id="servicePublicMethod" 
+	                  expression="execution(public * kr.co.hucloud.security.code.example..*Service.*(..))" />
+	    <aop:advisor advice-ref="txAdvice" pointcut-ref="servicePublicMethod"/>
+	</aop:config>
+
+</beans>

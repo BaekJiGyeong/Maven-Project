@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+			"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TableInvalidDAO">
+    
+    <select id="isInitiatedTable" resultType="_int">
+        select count(*) from all_tables where table_name = 'USERS'
+    </select>
+    
+    <update id="dropUsersTable">
+        DROP TABLE USERS
+    </update>
+    
+    <update id="dropBoardTable">
+        DROP TABLE BOARD
+    </update>
+    
+     <update id="dropReplyTable">
+        DROP TABLE REPLY
+    </update>
+    
+    <update id="dropBoardSeq">
+        DROP SEQUENCE BOARD_ID_SEQ
+    </update>
+    
+    <update id="dropReplySeq">
+        DROP SEQUENCE REPLY_ID_SEQ
+    </update>
+    
+    
+	<update id="createUserTable">
+		CREATE TABLE SYSTEM.USERS 
+		( 
+			USER_ID			VARCHAR2(100 BYTE)			NOT NULL, 
+			USER_NAME		VARCHAR2(100 BYTE), 
+			USER_PASSWORD	VARCHAR2(500 BYTE), 
+			IS_ADMIN_YN		VARCHAR2(3 BYTE), 
+			CRT_DT			DATE, 
+			MDFY_DT			DATE 
+		) 
+	</update>
+	
+	<update id="createUserTableIndex">
+		CREATE UNIQUE INDEX SYSTEM.USERS_PK ON SYSTEM.USERS (USER_ID)
+	</update>
+	
+	<update id="createUserTablePrimaryKey">
+		ALTER TABLE SYSTEM.USERS ADD ( CONSTRAINT USERS_PK PRIMARY KEY (USER_ID) )
+	</update>
+    
+	<update id="createBoardSeq">
+		CREATE SEQUENCE SYSTEM.BOARD_ID_SEQ 
+		START WITH 1 
+		INCREMENT BY 1 
+		MINVALUE 1 
+		MAXVALUE 999999 
+		CACHE 20 
+		CYCLE  
+		ORDER
+	</update>
+	
+	<update id="createReplySeq">
+		CREATE SEQUENCE SYSTEM.REPLY_ID_SEQ 
+		START WITH 1 
+		INCREMENT BY 1 
+		MINVALUE 1 
+		MAXVALUE 999999 
+		CACHE 20 
+		CYCLE  
+		ORDER
+	</update>
+    
+    <update id="createBoardTable">
+		CREATE TABLE SYSTEM.BOARD 
+		( 
+			ID				NUMBER					NOT NULL, 
+			SUBJECT			VARCHAR2(1000 BYTE), 
+			CONTENT			VARCHAR2(4000 BYTE), 
+			USER_ID			VARCHAR2(100 BYTE), 
+			CRT_DT			DATE, 
+			MDFY_DT			DATE, 
+			HIT				NUMBER, 
+			RECOMMEND		NUMBER,
+			FILE_NAME		VARCHAR2(1000 BYTE)
+		) 
+	</update>
+	 
+    <update id="createBoardTableIndex">
+		CREATE UNIQUE INDEX SYSTEM.BOARD_PK ON SYSTEM.BOARD (ID)
+	</update>
+	
+	<update id="createBoardTablePrimaryKey">
+		ALTER TABLE SYSTEM.BOARD ADD ( CONSTRAINT BOARD_PK PRIMARY KEY (ID) )
+	</update>
+	
+	<update id="createReplyTable">
+		CREATE TABLE SYSTEM.REPLY 
+		( 
+			ID				NUMBER					NOT NULL, 
+			BOARD_ID		NUMBER					NOT NULL, 
+			CONTENT			VARCHAR2(4000 BYTE), 
+			USER_ID			VARCHAR2(100 BYTE), 
+			CRT_DT			DATE, 
+			MDFY_DT			DATE, 
+			RECOMMEND		NUMBER 
+		) 
+	</update>
+	 
+    <update id="createReplyTableIndex">
+		CREATE UNIQUE INDEX SYSTEM.REPLY_PK ON SYSTEM.REPLY (ID)
+	</update>
+	
+	<update id="createReplyTablePrimaryKey">
+		ALTER TABLE SYSTEM.REPLY ADD ( CONSTRAINT REPLY_PK PRIMARY KEY (ID) )
+	</update>
+    
+	<insert id="initiateUser">
+		INSERT INTO SYSTEM.USERS ( 
+					USER_ID
+					, USER_NAME
+					, USER_PASSWORD
+					, IS_ADMIN_YN
+					, CRT_DT
+					, MDFY_DT
+		) 
+		VALUES 	( 
+					'admin'
+					, '관리자'
+					, 'admin'
+					, 'Y'
+					, SYSDATE
+					, SYSDATE 
+				) 
+	</insert>
+	
+	<insert id="initiateArticle" parameterType="string">
+		INSERT INTO SYSTEM.BOARD ( 
+					ID
+					, SUBJECT
+					, CONTENT
+					, USER_ID
+					, CRT_DT
+					, MDFY_DT
+					, HIT
+					, RECOMMEND
+		)  
+		VALUES 	( 
+					BOARD_ID_SEQ.NEXTVAL
+					, 'WELCOME'
+					, #{msg}
+					, 'admin'
+					, SYSDATE
+					, SYSDATE
+					, 0 
+					, 0
+				) 
+	</insert>
+	
+	<update id="addSaltColumn">
+	    ALTER TABLE SYSTEM.USERS
+ 		ADD (SALT  VARCHAR2(100 BYTE))
+	</update>
+	
+</mapper>
