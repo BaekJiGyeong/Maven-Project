@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:websocket="http://www.springframework.org/schema/websocket"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.2.xsd">
+
+
+	<bean id="paintDAO"
+			class="com.ktds.jgbaek.handler.socket.dao.impl.PaintDAOImpl">
+		<property name="sqlSessionTemplate" ref="sqlSessionTemplate"/>		
+	</bean>
+	
+	<bean id="echoHandler"
+			class="com.ktds.jgbaek.handler.EchoHandler">
+		<property name="paintDAO" ref="paintDAO"></property>
+	</bean>
+			
+	<bean id="paintHandler"
+			class="com.ktds.jgbaek.handler.PaintHandler">
+		<property name="paintDAO" ref="paintDAO"></property>
+	</bean>
+	
+	<websocket:handlers>
+		<websocket:mapping handler="echoHandler" path="/echo-ws"/>
+		<websocket:mapping handler="paintHandler" path="/echo-paint"/>
+		<websocket:sockjs />
+	</websocket:handlers>
+
+
+</beans>

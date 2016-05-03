@@ -1,5 +1,7 @@
 package com.ktds.jgbaek.article.web;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.stereotype.Controller;
@@ -57,6 +59,12 @@ public class ArticleController {
 	public ModelAndView doModifyAction(@Valid ArticleVO articleVO, Errors errors) {
 		return articleService.doModifyAction(articleVO, errors);
 	}
+	
+	@RequestMapping("/asdf")
+	public ModelAndView test(HttpServletRequest request, HttpServletResponse response ) {
+		return null;
+	}
+
 	
 	
 	

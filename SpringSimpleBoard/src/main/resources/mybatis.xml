@@ -11,7 +11,7 @@
 
 	<!-- 이 파일에서 query문을 가져온다. -->
 	<mappers>
-		<mapper resource="/com/ktds/jgbaek/article/dao/impl/sql/articleDAO.xml"/>
-		<mapper resource="/com/ktds/jgbaek/handler/socket/dao/impl/sql/paintDAO.xml"/>
+		<mapper resource="com/ktds/jgbaek/article/dao/impl/sql/articleDAO.xml"/>
+		<mapper resource="com/ktds/jgbaek/handler/socket/dao/impl/sql/paintDAO.xml"/>
 	</mappers>
 </configuration>
