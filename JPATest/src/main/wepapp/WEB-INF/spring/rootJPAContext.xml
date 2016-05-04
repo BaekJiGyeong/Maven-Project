@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
+		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.8.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.2.xsd">
+
+	<bean id="dataSource"
+			class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>	
+		<property name="url" value="jdbc:oracle:thin:@localhost:1521:XE"/>
+		<property name="username" value="SPRING"/>
+		<property name="password" value="spring"/>
+	</bean>
+	
+	
+
+	
+	<!-- JPA  공급자 설정-->
+	<bean id="hibernateJpaVendorAdaptor"
+			class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+		<!-- 자동 생성되는 SQL문을 보여주는 역할인듯 -->
+		<property name="showSql" value="true"/>
+	</bean>
+	
+	<!-- 캐시(영속성 컨테이너)에 접근할 수 있는 EntityManager 생성 -->
+	<bean id="entityManagerFactory"
+			class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="jpaVendorAdapter" ref="hibernateJpaVendorAdaptor"/>
+		<property name="packagesToScan" value="com.ktds.jgbaek"/>
+	</bean>
+	
+	<!-- JPA 전용 TransactionManager 생성 -->
+	<bean id="txManager"
+			class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory"/>		
+	</bean>
+	
+	
+	<!-- JPA Repository 자동 탬색 경로 설정 -->
+	<jpa:repositories base-package="com.ktds.jgbaek"
+						transaction-manager-ref="txManager"/>
+	<!-- Transaction Advice 설정 -->
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="*" rollback-for="RuntimeException"/>
+		</tx:attributes>
+	</tx:advice>
+	
+	<!--  Transanction AOP(Proxy) 설정 -->
+	<aop:config>
+		<aop:pointcut id="requiredTx"
+						expression="execution(* com.ktds.jgbaek..service..*.*(..))" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="requiredTx"/>
+	</aop:config>		
+</beans>
