@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+<!-- 현재 articleDAO의 이름 앞에 첫 글자는 대문자로 적는다. 패키지의 일종이다 -->
+<mapper namespace="MemberDAO">
+
+	<select id="getNowSystemDate" resultType="string">
+		SELECT	SYSDATE
+		FROM	DUAL
+	</select>
+
+</mapper>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+<!-- 현재 articleDAO의 이름 앞에 첫 글자는 대문자로 적는다. 패키지의 일종이다 -->
+<mapper namespace="MemberDAO">
+
+	<select id="getNowSystemDate" resultType="string">
+		SELECT	SYSDATE
+		FROM	DUAL
+	</select>
+	
+	<select id="getAllMbrTp" resultType="MbrTpVO">
+		SELECT	CD_ID cdId
+				, CD_NM cdNm
+		FROM	MBR_TP
+	</select>
+	
+	<insert id="doInsertMbrTp" parameterType="MbrTpVO">
+		INSERT INTO MBR_TP (
+		                    CD_ID
+		                    , CD_NM
+		                    ) 
+		VALUES				( 
+					        #{cdId}
+					        , #{cdNm}
+					        )
+	</insert>
+	
+	<delete id="doMbrTpDelete" parameterType="string">
+		DELETE
+		FROM	MBR_TP
+		WHERE	CD_ID = #{cdId}
+	</delete>
+
+	<update id="doMbrTpModify" parameterType="MbrTpVO">
+		UPDATE	MBR_TP
+		SET		CD_NM = #{cdNm}
+		WHERE	CD_ID = #{cdId}
+	</update>
+
+
+
+
+	<select id="getAllGrtdList" resultType="GrdtTpVO">
+		SELECT	CD_ID	cdId
+				, CD_NM	cdNm
+		FROM	GRDT_TP
+	</select>
+
+	<delete id="doGrdtDelete" parameterType="string">
+		DELETE
+		FROM	GRDT_TP
+		WHERE	CD_ID = #{cdId}
+	</delete>
+
+	<update id="doGrdtModify" parameterType="GrdtTpVO">
+		UPDATE	GRDT_TP
+		SET		CD_NM = #{cdNm}
+		WHERE	CD_ID = #{cdId}
+	</update>
+	
+	<insert id="doGrdtInsert" parameterType="GrdtTpVO">
+		INSERT INTO GRDT_TP (
+				 			  CD_ID
+				 			  , CD_NM
+				 			  ) 
+		VALUES 				(
+								#{cdId}
+								, #{cdNm}
+							 )
+	</insert>
+
+</mapper>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+					"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="MenuDAO">
+	
+	
+	<select id="getMenuCategory" resultType="MenuManageVO">
+		SELECT	CD_ID codeId
+				, CD_NM codeName
+				, URL url
+				, SRT srt
+		FROM	MENU_MNG
+	</select>
+
+	
+</mapper>

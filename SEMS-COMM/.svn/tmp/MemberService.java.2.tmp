@@ -1,0 +1,28 @@
+package com.ktds.sems.member.service;
+
+import org.springframework.web.servlet.ModelAndView;
+
+import com.ktds.sems.member.vo.MbrTpVO;
+
+public interface MemberService {
+
+	public ModelAndView viewGrdtPage();
+
+	public ModelAndView viewMbrTpPage();
+
+	public String doInsertMbrTp(String cdId, String cdNm);
+
+	public String doGrdtDelete(String cdId);
+
+	public String doGrdtModify(String cdId, String cdNm);
+
+<<<<<<< .mine
+	public String doMbrTpDelete(String cdId);
+
+	public String doMbrTpModify(String cdId, String cdNm);
+
+=======
+	public String doGrdtInsert(String cdId, String cdNm);
+
+>>>>>>> .r192
+}

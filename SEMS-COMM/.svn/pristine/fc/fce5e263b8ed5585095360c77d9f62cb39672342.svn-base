@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+					"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="EducationDAO">
+	
+	<select id="getAllEduCost" resultType="CostVO">
+		SELECT	CD_ID cdId
+				, CD_NM cdNm
+		FROM	EDU_CST
+		ORDER	BY CD_ID DESC
+	</select>
+
+	<select id="getEduCostByCdId" parameterType="_int" resultType="CostVO">
+		SELECT	CD_ID cdId
+				, CD_NM cdNm
+		FROM	EDU_CST
+		WHERE	CD_ID = #{coId}
+	</select>
+	
+	<update id="modifyEduCost" parameterType="CostVO">
+		UPDATE	EDU_CST 
+		SET		CD_NM = #{cdNm}
+		WHERE 	CD_ID = #{cdId}
+	</update>
+	
+	<select id="validCategoryId" parameterType="map" resultType="_int">
+		SELECT	COUNT(CD_ID)
+		<if test="categoryType == 'large'">
+		FROM	LRG_CTGR
+		</if>
+		<if test="categoryType == 'medium'">
+		FROM	MED_CTGR
+		</if>
+		<if test="categoryType == 'small'">
+		FROM	SML_CTGR
+		</if>
+		WHERE	CD_ID = #{ categoryId }
+	</select>
+	
+	<select id="validCategoryName" parameterType="map" resultType="_int">
+		SELECT	COUNT(CD_NM)
+		<if test="categoryType == 'large'">
+		FROM	LRG_CTGR
+		</if>
+		<if test="categoryType == 'medium'">
+		FROM	MED_CTGR
+		</if>
+		<if test="categoryType == 'small'">
+		FROM	SML_CTGR
+		</if>
+		WHERE	CD_NM = #{ categoryName }
+	</select>
+	
+	<insert id="addNewCategory" parameterType="CategoryVO">
+		INSERT INTO 
+		<if test="categoryType == 'large'">
+		LRG_CTGR	(	
+		</if>
+		<if test="categoryType == 'medium'">
+		MED_CTGR	(	L_CD_ID ,
+		</if>
+		<if test="categoryType == 'small'">
+		SML_CTGR	(	M_CD_ID ,
+		</if>
+						CD_ID
+						, CD_NM
+					)
+		VALUES 		( 
+						<if test="categoryType != 'large'">
+						#{ categoryType } ,
+						</if>
+						#{ categoryId }
+						, #{ categoryName }
+				   	)
+	</insert>
+</mapper>

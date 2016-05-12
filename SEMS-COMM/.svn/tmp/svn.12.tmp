@@ -1,0 +1,15 @@
+package com.ktds.sems.member.service;
+
+import org.springframework.web.servlet.ModelAndView;
+
+import com.ktds.sems.member.vo.MbrTpVO;
+
+public interface MemberService {
+
+	public ModelAndView viewGrdtPage();
+
+	public ModelAndView viewMbrTpPage();
+
+	public ModelAndView doAddMbrTp(MbrTpVO mbrTpVO);
+
+}

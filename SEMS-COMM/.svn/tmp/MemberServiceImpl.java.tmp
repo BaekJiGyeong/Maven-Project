@@ -1,0 +1,66 @@
+package com.ktds.sems.member.service.impl;
+
+import java.util.List;
+
+import org.springframework.web.servlet.ModelAndView;
+
+import com.ktds.sems.member.biz.MemberBiz;
+import com.ktds.sems.member.service.MemberService;
+<<<<<<< .mine
+import com.ktds.sems.member.vo.MbrTpVO;
+=======
+import com.ktds.sems.member.vo.GrdtTpVO;
+>>>>>>> .r118
+
+public class MemberServiceImpl implements MemberService{
+
+	private MemberBiz memberBiz;
+		
+	public void setMemberBiz(MemberBiz memberBiz) {
+		this.memberBiz = memberBiz;
+	}
+
+	@Override
+	public ModelAndView viewGrdtPage() {
+		
+		List<GrdtTpVO> grdtTpList = memberBiz.getAllGrtdList();
+		
+		ModelAndView view = new ModelAndView();
+		view.setViewName("member/grdtPage");
+		view.addObject("grtdTpList", grdtTpList);
+		return view;
+	}
+
+
+
+	@Override
+	public ModelAndView viewMbrTpPage() {
+		ModelAndView view = new ModelAndView();
+		view.setViewName("member/mbrTp");	
+		List<MbrTpVO> mbrTpVOList = memberBiz.getAllMbrTpList();
+		view.addObject("mbrTpVOList", mbrTpVOList);
+		
+		return view;
+	}
+
+
+
+	@Override
+	public ModelAndView doAddMbrTp(MbrTpVO mbrTpVO) {
+		ModelAndView view = new ModelAndView();
+		view.setViewName("redirect:/mbrTpPage");	
+		List<MbrTpVO> mbrTpVOList = memberBiz.getAllMbrTpList();
+		view.addObject("mbrTpVOList", mbrTpVOList);
+		
+		return view;
+	}
+
+	@Override
+	public String doGrdtDelete(String cdId) {
+		memberBiz.doGrdtDelete(cdId);
+		
+		//WEB-INF/view/member/grdtPage.jsp
+		return "redirect:/grdtPage";
+	}
+
+}
