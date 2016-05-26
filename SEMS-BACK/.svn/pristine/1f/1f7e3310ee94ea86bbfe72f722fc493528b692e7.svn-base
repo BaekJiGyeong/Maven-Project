@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD config 3.0//EN"
+					"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+	<typeAliases>
+		<typeAlias type="com.ktds.sems.education.vo.EducationVO" alias="EducationVO"/>
+		<typeAlias type="com.ktds.sems.file.vo.FileVO" alias="FileVO"/>
+		<typeAlias type="com.ktds.sems.member.vo.LoginHistoryVO" alias="LoginHistoryVO"/>
+		<typeAlias type="com.ktds.sems.member.vo.LoginHistorySearchVO" alias="LoginHistorySearchVO"/>
+		<typeAlias type="com.ktds.sems.education.vo.CostVO" alias="CostVO"/>
+		<typeAlias type="com.ktds.sems.education.vo.EducationTypeVO" alias="EducationTypeVO"/>
+		<typeAlias type="com.ktds.sems.education.vo.CategoryVO" alias="CategoryVO"/>
+		<typeAlias type="com.ktds.sems.education.vo.EducationHistoryVO" alias="EduHistoryVO"/>
+		<typeAlias type="com.ktds.sems.education.vo.EducationHistorySearchVO" alias="EduHistorySearchVO"/>
+		<typeAlias type="com.ktds.sems.member.vo.MemberVO" alias="MemberVO"/>
+		<typeAlias type="com.ktds.sems.teacher.vo.TeacherVO" alias="TeacherVO"/>
+		<typeAlias type="com.ktds.sems.teacher.vo.TeacherBookVO" alias="TeacherBookVO"/>
+		<typeAlias type="com.ktds.sems.teacher.vo.ProjectHistoryVO" alias="ProjectHistoryVO"/>
+		<typeAlias type="com.ktds.sems.teacher.vo.EducationHistoryVO" alias="TeacherEduHistoryVO"/>
+		<typeAlias type="com.ktds.sems.cooperation.vo.CooperationVO" alias="CooperationVO"/>
+		<typeAlias type="com.ktds.sems.cooperation.vo.CooperationSearchVO" alias="CooperationSearchVO"/>
+		<typeAlias type="com.ktds.sems.cooperation.vo.CooperationTypeVO" alias="CooperationTypeVO"/>
+		<typeAlias type="com.ktds.sems.member.vo.MemberSearchVO" alias="MemberSearchVO"/>
+		<typeAlias type="com.ktds.sems.member.vo.PersonalInfoReadVO" alias="PersonalInfoReadVO"/>
+		<typeAlias type="com.ktds.sems.teacher.vo.TeacherListVO" alias="TeacherListVO"/>
+		<typeAlias type="com.ktds.sems.teacher.vo.TeacherSearchVO" alias="TeacherSearchVO"/>
+	</typeAliases>
+
+	<mappers>
+		<mapper resource="com/ktds/sems/education/dao/impl/sql/educationDAO.xml" />
+		<mapper resource="com/ktds/sems/file/dao/impl/sql/fileDAO.xml"/>
+		<mapper resource="com/ktds/sems/member/dao/impl/sql/memberDAO.xml"/>
+		<mapper resource="com/ktds/sems/teacher/dao/impl/sql/teacherDAO.xml"/>
+		<mapper resource="com/ktds/sems/cooperation/dao/impl/sql/cooperationDAO.xml"/>
+	</mappers>
+</configuration>

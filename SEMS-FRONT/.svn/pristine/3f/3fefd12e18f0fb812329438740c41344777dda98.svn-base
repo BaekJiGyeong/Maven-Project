@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="FileDAO" >
+
+	<select id="getOneFileId" parameterType="string" resultType="FileVO">
+		SELECT  FILE_ID fileId
+		        , FILE_NM fileName
+		        , FILE_LOC fileLocation
+		        , ATC_ID articleId
+		FROM    SEMS.FILES 
+		WHERE   ATC_ID = #{educationId}
+	</select>
+	
+
+</mapper>

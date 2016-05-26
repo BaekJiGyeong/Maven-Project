@@ -18,7 +18,7 @@
 		OR		CD_NM = #{cdNm}
 	</select>
 	
-	<select id="isExistHighestEduData" resultType="_int">
+	<select id="isExistHighestEduData" parameterType="HighestEduTpVO" resultType="_int">
 		SELECT	COUNT(CD_ID)
 		FROM	HIGHEST_EDU_LV
 		WHERE	CD_ID = #{cdId}
@@ -119,14 +119,14 @@
 	</update>
 	
 	<insert id="doHighestEduInsert" parameterType="HighestEduTpVO">
-		INSERT INTO HIGHEST_EDU_LV (
-				 			  CD_ID
-				 			  , CD_NM
-				 			  ) 
-		VALUES 				(
-								#{cdId}
-								, #{cdNm}
-							 )
+		INSERT INTO HIGHEST_EDU_LV	(
+							 			  CD_ID
+							 			  , CD_NM
+						 			) 
+		VALUES 						(
+										#{cdId}
+										, #{cdNm}
+									 )
 	</insert>
 
 	<!-- 로그인 -->
@@ -224,4 +224,49 @@
 		SET		LGO_DT = SYSDATE
 		WHERE	LGI_HTR_ID = #{lgiHtrId}
 	</update>
+	
+	<update id="stampLogoutTimeByMemberId" parameterType="string">
+		UPDATE	LGI_HTR	
+		SET		LGO_DT = SYSDATE
+		WHERE	LGI_HTR_ID = 	(
+									SELECT 	MAX(LGI_HTR_ID)
+									FROM	LGI_HTR
+									WHERE	MBR_ID = #{memberId}
+								)
+	</update>
+	
+	<select id="getAllCodeMngList" resultType="CodeMngVO">
+		SELECT	CD_ID cdId
+				, CD_NM cdNm
+				, CD_TP cdTp
+				, CD_TP_2 cdTp2
+		FROM	CODE_MNG
+	</select>
+	
+	<delete id="doCodeMngDelete" parameterType="string">
+		DELETE
+		FROM	CODE_MNG
+		WHERE	CD_ID = #{cdId}
+	</delete>
+	<update id="doCodeMngModify" parameterType="codeMngVO">
+		UPDATE	CODE_MNG	
+		SET		CD_NM = #{cdNm}
+				, CD_TP_2 = #{cdTp2}
+		WHERE	CD_ID = #{cdId}
+	</update>
+	<insert id="doCodeMngInsert">
+		INSERT INTO CODE_MNG (
+			                    CD_ID
+			                    , CD_NM
+			                    , CD_TP
+			                    , CD_TP_2
+		                    ) 
+		VALUES				( 
+						        #{cdId}
+						        , #{cdNm}
+						        , #{cdTp}
+						        , #{cdTp2}
+					        )
+	</insert>
+	
 </mapper>

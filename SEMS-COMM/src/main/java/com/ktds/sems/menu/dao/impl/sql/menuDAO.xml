@@ -14,20 +14,20 @@
 		ORDER 	BY SRT ASC
 	</select>
 	
-	<select id="getOneMenuCategory" parameterType="string" resultType="MenuManageVO">
+	<!-- <select id="getOneMenuCategory" parameterType="string" resultType="MenuManageVO">
 		SELECT	CD_ID codeId
 				, CD_NM codeName
 				, URL url
 				, SRT sort
 		FROM	MENU_MNG
 		WHERE	CD_ID = #{codeId}
-	</select>
+	</select> -->
 
-	<update id="doMenuUpdate" parameterType="MenuManageVO">
+	<!-- <update id="doMenuUpdate" parameterType="MenuManageVO">
 		UPDATE	MENU_MNG
 		SET		SRT = #{sort}
 		WHERE	CD_ID = #{codeId}
-	</update>
+	</update> -->
 	
 	<update id="upMenuList" parameterType="map">
 		UPDATE	MENU_MNG

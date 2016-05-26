@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="teamDAO">
+	
+	<insert id="addNewTeamBBS" parameterType="TeamBBSVO">
+		INSERT INTO SEMS.TEAM_BBS (
+									   TEAM_BBS_ID, 
+									   TEAM_ID,
+									   TITLE, 
+									   DESCRIPT,
+									   MBR_ID, 
+									   CREATED_DATE, 
+					   			  ) 
+		VALUES 					( 
+									   {teamBBSId},
+									   {teamId},
+									 	{title},
+										{descript},
+										{memberId},
+									 	sysdate,
+								)
+	</insert>
+	
+	<select id="getNextTeamBBSId"  resultType = "_int">
+		SELECT	TEAM_BBS_SEQ.NEXTVAL
+		FROM	TEAM_BBS
+	</select>
+	
+	<select id="getSysDate" resultType = "String">
+		SELECT	TO_CHAR(SYSDATE , 'YYYYMMHH')
+		FROM	DUAL
+	</select>
+	
+</mapper>

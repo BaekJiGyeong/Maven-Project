@@ -13,6 +13,7 @@
 		<typeAlias type="com.ktds.sems.education.vo.TimeVO" alias="TimeVO"/>
 		<typeAlias type="com.ktds.sems.menu.vo.MenuManageVO" alias="MenuManageVO"/>
 		<typeAlias type="com.ktds.sems.education.vo.CategoryVO" alias="CategoryVO"/>
+		<typeAlias type="com.ktds.sems.member.vo.CodeMngVO" alias="CodeMngVO"/>
 	</typeAliases>
 
 	<mappers>

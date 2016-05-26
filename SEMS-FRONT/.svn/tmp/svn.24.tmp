@@ -1,0 +1,25 @@
+package com.ktds.sems.pc.dao;
+
+import java.util.List;
+
+import com.ktds.sems.education.vo.EducationVO;
+import com.ktds.sems.member.vo.MemberVO;
+import com.ktds.sems.pc.vo.UsedPcVO;
+
+public interface PcDAO {
+
+	public List<EducationVO> getEduListByMember(MemberVO memberVO);
+
+	public List<UsedPcVO> getUsedPcListByMember(MemberVO memberVO);
+
+	public String getPcIdByIp(String pcIp);
+
+	public String getEducationIdByTitle(String educationTitle);
+
+	public int doRegisterMyPc(UsedPcVO usedPcVO);
+
+	public void doDeleteMyPc(String pcId);
+
+	public List<EducationVO> getEduListExceptUsed(MemberVO memberVO);
+
+}

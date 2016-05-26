@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="EducationDAO" >
+
+<select id="nextEduSeq" resultType="_int">
+		SELECT	EDU_ID_SEQ.NEXTVAL
+		FROM	DUAL
+	</select>
+	
+	<select id="nowDate" resultType="string">
+		SELECT	TO_CHAR(SYSDATE, 'YYYYMMDD')
+		FROM	DUAL
+	</select>
+	
+	<insert id="insertNewEducation" parameterType="educationVO">
+
+		INSERT INTO SEMS.EDU_INFO (
+									   EDU_ID 
+									   , EDU_CTGR  
+									   , EDU_TTL  
+									   , MBR_ID 
+									   , MAX_MBR 
+									   , EDU_LOC 
+									   , EDU_CLCM 
+									   , EDU_INTR 
+									   , SRT_DATE 
+									   , END_DATE 
+									   , START_TM 
+									   , END_TM 
+									   , EDU_TP 
+									   , COST 
+									) 
+		VALUES 					 (	#{educationId}
+									 , #{educationCategory}
+									 , #{educationTitle}
+									 , #{memberId}
+									 , #{maxMember}
+									 , #{educationLocation}
+									 , #{educationCurriculum}
+									 , #{educationIntroduce}
+									 , #{startDate}
+									 , #{endDate }
+									 , #{startTime}
+									 , #{endTime}
+									 , #{educationType}
+									 , #{cost}
+								)
+	</insert>
+	
+	<select id="getOneEducation" parameterType="string" resultType="EducationVO">
+		SELECT	E.EDU_ID educationId
+				, EDU_CTGR educationCategory
+				, EDU_TTL educationTitle
+				, MBR_ID memberId
+				, MAX_MBR maxMember
+				, EDU_LOC educationLocation
+				, EDU_CLCM educationCurriculum
+				, EDU_INTR educationIntroduce
+				, SRT_DATE startDate
+				, END_DATE endDate
+				, START_TM startTime
+				, END_TM endTime
+				, EDU_TP educationType
+				, COST cost
+				, FILE_NM fileName
+		FROM	EDU_INFO E
+				, FILES	F
+		WHERE	E.EDU_ID = #{educationId}
+		AND		F.ATC_ID = E.EDU_ID
+	</select>
+	
+	<update id="modifyNewEducation" parameterType="EducationVO">
+	 	UPDATE	EDU_INFO
+	 	SET		EDU_ID = #{educationId}
+	 	<if test="educationCategory != null">
+	 			, EDU_CTGR = #{educationCategory}
+	 	</if>
+	 	<if test="educationTitle != null">
+	 			, EDU_TTL = #{educationTitle}
+	 	</if>
+	 	<if test="memberId != null">
+	 			, MBR_ID = #{memberId}
+	 	</if>
+	 	<if test="maxMember != null">
+	 			, MAX_MBR = #{maxMember}
+	 	</if>
+	 	<if test="educationLocation != null">
+	 			, EDU_LOC = #{educationLocation}
+	 	</if>
+	 	<if test="educationCurriculum != null">
+	 			, EDU_CLCM = #{educationCurriculum}
+	 	</if>
+	 	<if test="educationIntroduce != null">
+	 			, EDU_INTR = #{educationIntroduce}
+	 	</if>
+	 	<if test="startDate != null">
+	 			, SRT_DATE = #{startDate}
+	 	</if>
+	 	<if test="endDate != null">
+	 			, END_DATE = #{endDate}
+	 	</if>
+	 	<if test="startTime != null">
+	 			, START_TM = #{startTime}
+	 	</if>
+	 	<if test="endTime != null">
+	 			, END_TM = #{endTime}
+	 	</if>
+	 	<if test="educationType != null">
+	 			, EDU_TP = #{educationType}
+	 	</if>
+	 	<if test="cost != null">
+	 			, COST = #{cost}
+	 	</if>
+	 	WHERE	EDU_ID = #{educationId}
+	</update>
+
+	<select id="costCodeList" resultType="CostVO">
+		SELECT	CD_ID cdId
+				, CD_NM cdNm
+		FROM	EDU_CST
+	</select>
+		<select id="typeCodeList"  resultType="EducationTypeVO">
+		SELECT	CD_ID cdId
+				, CD_NM cdNm
+		FROM 	EDU_TIME
+	</select>
+	
+	<select id="categoryCodeList" resultType="CategoryVO">
+		SELECT	CD_ID cdId
+				, CD_NM cdNm
+				, M_CD_ID
+		FROM	SML_CTGR
+	</select>
+		
+	<select id="getAllEducationHistory" parameterType="eduHistorySearchVO" resultType="EduHistoryVO">
+				SELECT	JCE_HTR.EDU_HTR_ID educationHistoryId
+				, JCE_HTR.EDU_TTL educationTitle
+				, 	JCE_HTR.MBR_ID memberId
+				, 	JCE_HTR.EDU_HTR_DT educationHistoryDate
+				, 	JCE_HTR.STAT state
+				, 	JCE_HTR.IP ip
+				, 	JCE_HTR.CMNT cmnt
+				, 	JCE_HTR.FDBK fdbk
+		FROM	(
+					SELECT	ROWNUM AS RNUM
+							, EDU_HTR_KEYWORD.*
+					FROM	(
+									SELECT	EDU_HTR.*, EDU_INFO.EDU_TTL
+									FROM	EDU_HTR
+											, EDU_INFO
+									WHERE	EDU_HTR.EDU_ID = EDU_INFO.EDU_ID
+									AND		(
+												EDU_HTR.STAT = 'EDU_CL_A'
+												OR     EDU_HTR.STAT = 'EDU_GU_A'
+												OR     EDU_HTR.STAT = 'EDU_JN_A'
+											)
+									<if test="searchKeyword != null">
+									<if test="searchKeyword != ''">
+									AND		EDU_HTR.EDU_ID IN 	(
+																	SELECT	EDU_ID
+																	FROM	EDU_INFO
+																	WHERE	EDU_TTL IN #{searchKeyword}
+																)
+									</if>
+									</if>
+							) EDU_HTR_KEYWORD
+					WHERE	ROWNUM <![CDATA[<=]]> #{endIndex}
+				) JCE_HTR
+		WHERE	RNUM <![CDATA[>=]]> #{startIndex}
+	</select>
+	
+	<select id="getAllEduHistoryCount" parameterType="eduHistorySearchVO" resultType="_int">
+		SELECT	COUNT(*)
+		FROM	EDU_HTR
+		WHERE	1 = 1
+		AND		(
+					STAT = 'EDU_CL_A'
+					OR     STAT = 'EDU_GU_A'
+					OR     STAT = 'EDU_JN_A'
+				)
+		<if test="searchKeyword != null">
+		<if test="searchKeyword != ''">
+		AND		EDU_HTR.EDU_ID IN 	(
+										SELECT	EDU_INFO.EDU_ID
+										FROM	EDU_INFO
+										WHERE	EDU_INFO.EDU_TTL IN #{searchKeyword}
+							)
+		</if>
+		</if>
+	</select>
+	
+	<select id="getJCEduHistoryHistory" parameterType="eduHistorySearchVO" resultType="EduHistoryVO">
+ 		SELECT	JCE_HTR.EDU_HTR_ID educationHistoryId
+				, JCE_HTR.EDU_TTL educationTitle
+				, 	JCE_HTR.MBR_ID memberId
+				, 	JCE_HTR.EDU_HTR_DT educationHistoryDate
+				, 	JCE_HTR.STAT state
+				, 	JCE_HTR.IP ip
+				, 	JCE_HTR.CMNT cmnt
+				, 	JCE_HTR.FDBK fdbk
+		FROM	(
+					SELECT	ROWNUM AS RNUM
+							, EDU_HTR_KEYWORD.*
+					FROM	(
+									SELECT	EDU_HTR.*, EDU_INFO.EDU_TTL
+									FROM	EDU_HTR
+											, EDU_INFO
+									WHERE	EDU_HTR.EDU_ID = EDU_INFO.EDU_ID
+									AND		STAT = 'EDU_JN_C'
+									<if test="searchKeyword != null">
+									<if test="searchKeyword != ''">
+									AND		EDU_HTR.EDU_ID IN 	(
+																	SELECT	EDU_ID
+																	FROM	EDU_INFO
+																	WHERE	EDU_TTL IN #{searchKeyword}
+																)
+									</if>
+									</if>
+							) EDU_HTR_KEYWORD
+					WHERE	ROWNUM <![CDATA[<=]]> #{endIndex}
+				) JCE_HTR
+		WHERE	RNUM <![CDATA[>=]]> #{startIndex}
+	</select>
+	
+	<select id="getJCEduHistoryCount" parameterType="eduHistorySearchVO" resultType="_int">
+		SELECT	COUNT(*)
+		FROM	EDU_HTR
+		WHERE	EDU_HTR.STAT = 'EDU_JN_C'
+		<if test="searchKeyword != null">
+		<if test="searchKeyword != ''">
+		AND		EDU_HTR.EDU_ID IN 	(
+										SELECT	EDU_INFO.EDU_ID
+										FROM	EDU_INFO
+										WHERE	EDU_INFO.EDU_TTL IN #{searchKeyword}
+							)
+		</if>
+		</if>
+ 	</select>
+	
+	<update id="applyJoinEdcationByMemberId" parameterType="map">
+		UPDATE	 EDU_HTR
+		SET		 STAT = #{changeState}
+		WHERE	 EDU_HTR_ID = #{educationHistoryId}
+	</update>
+	
+	<update id="cancelJoinEducationByMemberId" parameterType="map">
+		UPDATE	 EDU_HTR
+		SET		 STAT = #{changeState}
+		WHERE	 EDU_HTR_ID = #{educationHistoryId}
+	</update>
+	
+	<select id="getStateByEducationHistroyId" parameterType="String" resultType="String">
+		SELECT  STAT
+		FROM	EDU_HTR
+		WHERE	EDU_HTR_ID = #{educationHistoryId}
+	</select>
+	
+	<update id= "changeEducationApplyState" parameterType ="String">
+		UPDATE  EDU_HTR
+		SET	STAT = 'EDU_JN_A'
+		WHERE	EDU_HTR_ID = #{educationHistoryId}
+	</update>
+	
+	
+</mapper>
