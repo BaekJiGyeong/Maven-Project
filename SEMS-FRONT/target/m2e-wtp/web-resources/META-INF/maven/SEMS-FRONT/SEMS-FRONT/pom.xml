@@ -220,7 +220,7 @@
 	    <dependency> 
                 <groupId>org.springframework</groupId> 
                 <artifactId>spring-context-support</artifactId> 
-                <version>4.2.6.RELEASE</version> 
+                <version>4.2.4.RELEASE</version> 
         </dependency>
 		<dependency>
 			<groupId>org.aspectj</groupId>
@@ -262,6 +262,10 @@
 			<artifactId>my-utilities</artifactId>
 			<version>1.0</version>
 		</dependency>
-		
+		<dependency>
+			<groupId>opensymphony</groupId>
+			<artifactId>sitemesh</artifactId>
+			<version>2.4.2</version>
+		</dependency>		
 	</dependencies>
 </project>

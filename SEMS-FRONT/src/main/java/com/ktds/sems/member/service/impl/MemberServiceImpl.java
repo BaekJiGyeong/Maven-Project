@@ -1,7 +1,9 @@
 package com.ktds.sems.member.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,6 +30,7 @@ import com.ktds.sems.education.vo.QNAVO;
 import com.ktds.sems.education.vo.ReportReplyVO;
 import com.ktds.sems.member.biz.MemberBiz;
 import com.ktds.sems.member.service.MemberService;
+import com.ktds.sems.member.vo.AttendListVO;
 import com.ktds.sems.member.vo.AttendVO;
 import com.ktds.sems.member.vo.GraduationTypeVO;
 import com.ktds.sems.member.vo.HighestEducationLevelVO;
@@ -235,33 +238,46 @@ public class MemberServiceImpl implements MemberService {
 		AjaxUtil.sendResponse(response, message);
 		return;
 	}
+	
+	public static final String NOT_EXISTS_ID = "NO";
+	public static final String WAS_RESIGN_ID = "RSN";
+	public static final String WAS_BLOCK_ID = "OVER";
+	public static final String VALID_ID = "OK";
+	public static final String CHANGE_PASSWORD = "CNGPW";
 
+	/**
+	 * @see NOT_EXISTS_ID- NO - 아이디가 없을 경우
+	 * @see WAS_RESIGN_ID- RSN - 탈퇴한 회원일 경우
+	 * @see WAS_BLOCK_ID- OVER - 비밀번호를 3회이상 틀려 막혔을 경우
+	 * @see VALID_ID : OK- 정상적인 회원일 경우
+	 * @see CHANGE_PASSWORD- CNGPW -  비밀번호를 변경하지 않았을 경우
+	 */
 	@Override
 	public String login(MemberVO loginVO, Errors errors, HttpSession session, HttpServletRequest request) {
 
 		// 아이디 있는지 확인
 		if (!memberBiz.isExistId(loginVO.getId())) {
-			return "NO";
+			return NOT_EXISTS_ID;
 		}
 
 		// 탈퇴한 회원인지 확인
 		if (memberBiz.isResign(loginVO.getId())) {
-			return "RSN";
+			return WAS_RESIGN_ID;
 		}
 
 		// 잠긴 계정은 로그인 못하도록 막는다.
 		if (memberBiz.isAccountLock(loginVO.getId())) {
-			return "OVER";
+			return WAS_BLOCK_ID;
 		}
 		
 		//회원정보수정 3번실패 시 잠금됬기 때문에 로그인 못하도록 막는다.
 		if (memberBiz.isModifyAccountLock(loginVO.getId())) {
-			return "OVER";
+			return WAS_BLOCK_ID;
 		}
 
 		// 로그인 30일 경과 계정
 		if (memberBiz.needToChangPassword(loginVO.getId())) {
-			return "CNGPW";
+			return CHANGE_PASSWORD;
 		}
 
 		boolean isLoginSuccess = memberBiz.login(session, loginVO, request);
@@ -287,7 +303,7 @@ public class MemberServiceImpl implements MemberService {
 				// 로그인 내역 남기기
 				memberBiz.stampLoginTime(session, request, loginVO);
 
-				return "OK";
+				return VALID_ID;
 
 			} else {
 				return "NO";
@@ -941,7 +957,7 @@ public class MemberServiceImpl implements MemberService {
 	 * 구본호 > 이기연(SM)
 	 */
 	@Override
-	public ModelAndView getCourseList(HttpSession session, int pageNo) {
+	public ModelAndView getCourseList(HttpSession session, int pageNo, EducationSearchVO educationSearchVO) {
 
 		EducationListVO preEducationListVO = new EducationListVO();
 		Paging paging = new Paging();
@@ -953,7 +969,6 @@ public class MemberServiceImpl implements MemberService {
 		int getPreCourseCountById = memberBiz.getCourseCountById(memberVO.getId());
 		paging.setTotalArticleCount(getPreCourseCountById);
 
-		EducationSearchVO educationSearchVO = new EducationSearchVO();
 		educationSearchVO.setPageNo(pageNo);
 		educationSearchVO.setStartIndex(paging.getStartArticleNumber());
 		educationSearchVO.setEndIndex(paging.getEndArticleNumber());
@@ -969,6 +984,7 @@ public class MemberServiceImpl implements MemberService {
 		if ( myEducationList.size() >= 0 ) {
 			view.setViewName("myPage/myEduCourseInfo");
 			view.addObject("educationListVO", myEducationList);
+			view.addObject("educationSearchVO", educationSearchVO);
 			view.addObject("preEducationListVO", preEducationListVO);
 		} 
 		else {
@@ -1030,19 +1046,39 @@ public class MemberServiceImpl implements MemberService {
 		//TODO 중복 클릭 처리
 		//TODO 출결이력 업데이트
 		
-		
 	}
 
 	@Override
-	public ModelAndView getAllAttendHistory(HttpSession session, String educationId) {
+	public ModelAndView getAllAttendHistory(HttpSession session, String educationId, int pageNo) {
 		
 		MemberVO memberVO = (MemberVO) session.getAttribute(Session.MEMBER);
-		//memberBiz.getAllAttendClassListById(loginVO);
-		List<AttendVO> attendList = memberBiz.getAllAttendHistory(memberVO, educationId);
-		ModelAndView view = new ModelAndView();
+		Map<String, String> eduIdAndMemberId = new HashMap<String, String>();
+
+		eduIdAndMemberId.put("educationId", educationId);
+		eduIdAndMemberId.put("memberId", memberVO.getId());
+		EducationVO eduInfo = memberBiz.getOneEducationInfo(eduIdAndMemberId);
 		
+		Paging paging = new Paging();
+		paging.setPageNumber(pageNo+"");
+		
+		Map<String, List<String>> attends = memberBiz.getAllAttendHistory(memberVO, educationId, paging);
+		
+		AttendListVO attendList = new AttendListVO();
+		attendList.setAttends(attends);
+		attendList.setPaging(paging);
+		
+		
+		ModelAndView view = new ModelAndView();
+		view.addObject("eduInfo", eduInfo);
+		view.addObject("attendList", attendList);
 		view.setViewName("member/attendHistoryDetail");
+		
 		return view;
+	}
+
+	@Override
+	public boolean checkAttend(String id) {
+		return memberBiz.checkAttend(id);
 	}
 	
 	

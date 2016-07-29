@@ -11,7 +11,15 @@
 		FROM SEMS.FILES
 		WHERE ATC_ID = #{educationId}
 	</select>
-
+	<select id="getFileList" parameterType="FileVO" resultType="FileVO">
+		SELECT FILE_ID fileId
+		, FILE_NM fileName
+		, FILE_LOC fileLocation
+		, ATC_ID articleId
+		FROM FILES
+		WHERE ATC_ID = #{articleId}
+		AND FILE_NM = #{fileName}
+	</select>
 	<insert id="insertFile" parameterType="FileVO">
 		INSERT	INTO FILES	(
 								FILE_ID
@@ -60,6 +68,7 @@
 				, ATC_ID articleId
 		FROM	FILES
 		WHERE	ATC_ID = #{articleId}
+		AND		IS_DELETE = 'N'
 	</select>
 	
 	<select id="getOneFileByFileId" resultType="FileVO" parameterType="string">
@@ -70,4 +79,11 @@
 		FROM	FILES
 		WHERE	FILE_ID = #{fileId}
 	</select>
+
+	<update id="deleteFile" parameterType="string">
+		UPDATE	FILES
+		SET		IS_DELETE = 'Y'
+		WHERE	ATC_ID = #{articleId}
+	</update>
+
 </mapper>

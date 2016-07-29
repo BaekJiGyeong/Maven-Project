@@ -1,6 +1,7 @@
 package com.ktds.sems.member.biz;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -22,6 +23,8 @@ import com.ktds.sems.member.vo.LoginHistoryVO;
 import com.ktds.sems.member.vo.MemberTypeVO;
 import com.ktds.sems.member.vo.MemberVO;
 import com.ktds.sems.member.vo.MenuManageVO;
+
+import kr.co.hucloud.utilities.web.Paging;
 
 public interface MemberBiz {
 
@@ -163,10 +166,14 @@ public interface MemberBiz {
 
 	public boolean updateLeaveClass(String memberId);
 
-	public List<AttendVO> getAllAttendHistory(MemberVO memberVO, String educationId);
+	public Map<String, List<String>> getAllAttendHistory(MemberVO memberVO, String educationId, Paging paging);
 
 	public List<ReportReplyVO> getReportReplyListByMemberId(String id);
 
 	public List<EducationVO> getPreCourseList(EducationSearchVO educationSearchVO);
+
+	public EducationVO getOneEducationInfo(Map<String, String> eduIdAndMemberId);
+
+	public boolean checkAttend(String id);
 
 }

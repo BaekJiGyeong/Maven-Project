@@ -1,6 +1,9 @@
 package com.ktds.sems.member.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,14 +22,16 @@ import com.ktds.sems.education.vo.EducationCostVO;
 import com.ktds.sems.education.vo.EducationHistoryListVO;
 import com.ktds.sems.education.vo.EducationHistorySearchVO;
 import com.ktds.sems.education.vo.EducationHistoryVO;
+import com.ktds.sems.education.vo.EducationListVO;
+import com.ktds.sems.education.vo.EducationSearchVO;
 import com.ktds.sems.education.vo.EducationStateVO;
-<<<<<<< .mine
 import com.ktds.sems.education.vo.EducationVO;
-=======
 import com.ktds.sems.education.vo.QNAVO;
->>>>>>> .r1600
+import com.ktds.sems.education.vo.ReportReplyVO;
 import com.ktds.sems.member.biz.MemberBiz;
 import com.ktds.sems.member.service.MemberService;
+import com.ktds.sems.member.vo.AttendListVO;
+import com.ktds.sems.member.vo.AttendVO;
 import com.ktds.sems.member.vo.GraduationTypeVO;
 import com.ktds.sems.member.vo.HighestEducationLevelVO;
 import com.ktds.sems.member.vo.LoginHistoryListVO;
@@ -49,38 +54,33 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-	public ModelAndView addNewMember(MemberVO member, Errors errors, String repeatPassword) {
+	public String addNewMember(MemberVO member, String repeatPassword, Errors errors, HttpServletResponse response) {
 		ModelAndView view = new ModelAndView();
 		
 		String memberType = member.getMemberType();
 		if (memberType == null) {
-			view.setViewName("redirect:/invalidAccess");
-			return view;
+			return "NO";
 		}
+		
+		List<HighestEducationLevelVO> highestEducationLevelList = new ArrayList<HighestEducationLevelVO>(); 
+		List<GraduationTypeVO> graduationTypeList = new ArrayList<GraduationTypeVO>();
 
 		boolean isNotError = true;
 		isNotError = isAllValidValue(member, repeatPassword, view);
 		if (errors.hasErrors() || !isNotError) {
-			List<HighestEducationLevelVO> highestEducationLevelList = memberBiz.getHighestEducationLevels();
-			List<GraduationTypeVO> graduationTypeList = memberBiz.getGraduationTypes();
-
-			view.addObject("graduationTypeList", graduationTypeList);
-			view.addObject("highestEducationLevelList", highestEducationLevelList);
-
-			view.addObject("member", member);
+			highestEducationLevelList = memberBiz.getHighestEducationLevels();
+			graduationTypeList = memberBiz.getGraduationTypes();
+			return "NO";
 		} else if (isNotError) {
 			setSaltAndPassword(member);
 			if (memberBiz.addNewMember(member)) {
-				memberBiz.checkRegistState(member.getId());
-				view.setViewName("redirect:/loginPage");
+				return "OK";
 			} else {
-				//TODO
+				return "NO";
 			}
 		} else {
 			throw new RuntimeException("잘 못 된 입력 : 회원 종류");
 		}
-
-		return view;
 	}
 
 	/**
@@ -238,33 +238,46 @@ public class MemberServiceImpl implements MemberService {
 		AjaxUtil.sendResponse(response, message);
 		return;
 	}
+	
+	public static final String NOT_EXISTS_ID = "NO";
+	public static final String WAS_RESIGN_ID = "RSN";
+	public static final String WAS_BLOCK_ID = "OVER";
+	public static final String VALID_ID = "OK";
+	public static final String CHANGE_PASSWORD = "CNGPW";
 
+	/**
+	 * @see NOT_EXISTS_ID- NO - 아이디가 없을 경우
+	 * @see WAS_RESIGN_ID- RSN - 탈퇴한 회원일 경우
+	 * @see WAS_BLOCK_ID- OVER - 비밀번호를 3회이상 틀려 막혔을 경우
+	 * @see VALID_ID : OK- 정상적인 회원일 경우
+	 * @see CHANGE_PASSWORD- CNGPW -  비밀번호를 변경하지 않았을 경우
+	 */
 	@Override
 	public String login(MemberVO loginVO, Errors errors, HttpSession session, HttpServletRequest request) {
 
 		// 아이디 있는지 확인
 		if (!memberBiz.isExistId(loginVO.getId())) {
-			return "NO";
+			return NOT_EXISTS_ID;
 		}
 
 		// 탈퇴한 회원인지 확인
 		if (memberBiz.isResign(loginVO.getId())) {
-			return "RSN";
+			return WAS_RESIGN_ID;
 		}
 
 		// 잠긴 계정은 로그인 못하도록 막는다.
 		if (memberBiz.isAccountLock(loginVO.getId())) {
-			return "OVER";
+			return WAS_BLOCK_ID;
 		}
 		
 		//회원정보수정 3번실패 시 잠금됬기 때문에 로그인 못하도록 막는다.
 		if (memberBiz.isModifyAccountLock(loginVO.getId())) {
-			return "OVER";
+			return WAS_BLOCK_ID;
 		}
 
 		// 로그인 30일 경과 계정
 		if (memberBiz.needToChangPassword(loginVO.getId())) {
-			return "CNGPW";
+			return CHANGE_PASSWORD;
 		}
 
 		boolean isLoginSuccess = memberBiz.login(session, loginVO, request);
@@ -290,7 +303,7 @@ public class MemberServiceImpl implements MemberService {
 				// 로그인 내역 남기기
 				memberBiz.stampLoginTime(session, request, loginVO);
 
-				return "OK";
+				return VALID_ID;
 
 			} else {
 				return "NO";
@@ -700,12 +713,22 @@ public class MemberServiceImpl implements MemberService {
 		List<LoginHistoryVO> loginHistoryList = memberBiz.getLoginHistoryListByMemberId(member.getId());
 		List<EducationHistoryVO> educationHistoryList = memberBiz.getEducationHistoryListByMemberId(member.getId());
 		List<QNAVO> qnaList = memberBiz.getQnaListByMemberId(member.getId());
+		List<ReportReplyVO> reportReplyList = memberBiz.getReportReplyListByMemberId(member.getId());
+		
+		//퇴근 가능 여부
+		String message = "NO";
+		boolean isVerifyLeave = memberBiz.isVerifyLeave(member.getId());
+		if (isVerifyLeave) {
+			message = "OK";
+		}
 		
 		view.setViewName("member/myPage");
 		view.addObject("menuList", menuList);
 		view.addObject("loginHistoryList", loginHistoryList);
 		view.addObject("educationHistoryList", educationHistoryList);
 		view.addObject("qnaList", qnaList);
+		view.addObject("reportReplyList", reportReplyList);
+		view.addObject("leaveVerified", message);
 
 		return view;
 	}
@@ -746,6 +769,24 @@ public class MemberServiceImpl implements MemberService {
 		
 		return view;
 	}
+	
+	@Override
+	public ModelAndView getAllAttendClassListById(HttpSession session) {
+		
+		MemberVO memberVO = (MemberVO) session.getAttribute(Session.MEMBER);
+
+		/* 회원별 강의 */
+		List<EducationVO> attendClassList = memberBiz.getAllAttendClassListById(memberVO);
+		
+		ModelAndView view = new ModelAndView();
+		
+		view.setViewName("member/attendHistory");
+		view.addObject("attendClassList", attendClassList);
+		
+		return view;
+	}
+	
+	
 
 	@Override
 	public String registerPolicy(HttpSession session) {
@@ -872,7 +913,7 @@ public class MemberServiceImpl implements MemberService {
 		
 		EducationHistoryVO educationHistory = memberBiz.getOneEducationByIdAndEducationId(educationId, memberVO.getId());
 		view.addObject("educationHistory", educationHistory);
-		view.setViewName("member/resignCourseWrite");
+		view.setViewName("myPage/resignCourseWrite");
 		
 		return view;
 	}
@@ -916,33 +957,35 @@ public class MemberServiceImpl implements MemberService {
 	 * 구본호 > 이기연(SM)
 	 */
 	@Override
-	public ModelAndView getCourseList(HttpSession session, int pageNo) {
+	public ModelAndView getCourseList(HttpSession session, int pageNo, EducationSearchVO educationSearchVO) {
 
-		EducationHistoryListVO educationHistoryListVO = new EducationHistoryListVO();
+		EducationListVO preEducationListVO = new EducationListVO();
 		Paging paging = new Paging();
-		educationHistoryListVO.setPaging(paging);
+		preEducationListVO.setPaging(paging);
 
 		paging.setPageNumber(pageNo + "");
 		
 		MemberVO memberVO = (MemberVO) session.getAttribute(Session.MEMBER);
-		int totalEducationHistoryCountById = memberBiz.getCourseCountById(memberVO.getId());
-		paging.setTotalArticleCount(totalEducationHistoryCountById);
+		int getPreCourseCountById = memberBiz.getCourseCountById(memberVO.getId());
+		paging.setTotalArticleCount(getPreCourseCountById);
 
-		EducationHistorySearchVO educationHistorySearchVO = new EducationHistorySearchVO();
-		educationHistorySearchVO.setPageNo(pageNo);
-		educationHistorySearchVO.setStartIndex(paging.getStartArticleNumber());
-		educationHistorySearchVO.setEndIndex(paging.getEndArticleNumber());
-		educationHistorySearchVO.setMemberId(memberVO.getId());
+		educationSearchVO.setPageNo(pageNo);
+		educationSearchVO.setStartIndex(paging.getStartArticleNumber());
+		educationSearchVO.setEndIndex(paging.getEndArticleNumber());
+		educationSearchVO.setMemberId(memberVO.getId());
 		
-		List<EducationHistoryVO> educationHistoryList = memberBiz.getCourseList(educationHistorySearchVO);
-		educationHistoryListVO.setEducationHistoryList(educationHistoryList);
+		List<EducationVO> myEducationList = memberBiz.getCourseList(memberVO.getId());
+		List<EducationVO> myPreEducationList = memberBiz.getPreCourseList(educationSearchVO);
+		preEducationListVO.setEducationList(myPreEducationList);
 
 		ModelAndView view = new ModelAndView();
 		
 		// SM 이기연 수정 
-		if ( totalEducationHistoryCountById > 0 ) {
-			view.setViewName("member/resignCourseList");
-			view.addObject("educationHistoryListVO", educationHistoryListVO);
+		if ( myEducationList.size() >= 0 ) {
+			view.setViewName("myPage/myEduCourseInfo");
+			view.addObject("educationListVO", myEducationList);
+			view.addObject("educationSearchVO", educationSearchVO);
+			view.addObject("preEducationListVO", preEducationListVO);
 		} 
 		else {
 			List<MenuManageVO> menuList = memberBiz.getMenuCategoryList();
@@ -951,43 +994,8 @@ public class MemberServiceImpl implements MemberService {
 			view.addObject("menuList", menuList);
 		}
 		return view;
-
 	}
 
-<<<<<<< .mine
-	@Override
-	public ModelAndView viewRegisterMyPCPage(HttpSession session, HttpServletRequest request) {
-		MemberVO memberVO = (MemberVO) session.getAttribute(Session.MEMBER);
-		List<EducationVO> eduListByMember = memberBiz.getEduListByMember(memberVO);
-		
-		for (EducationVO educationVO : eduListByMember) {			
-			System.out.println("eduList**"+educationVO.getEducationTitle());
-			System.out.println(educationVO.getEducationLocation());
-		}
-		String myPCIp= request.getRemoteHost();
-		
-		ModelAndView view = new ModelAndView();
-		view.setViewName("member/registerMyPC");
-		view.addObject("eduListByMember", eduListByMember);
-		view.addObject("myPCIp", myPCIp);
-		return view;
-	}
-
-	@Override
-	public void getEduLocationByTitle(String title, HttpServletResponse response, HttpSession session) {
-		String location = "";
-		MemberVO memberVO = (MemberVO) session.getAttribute(Session.MEMBER);
-		List<EducationVO> eduListByMember = memberBiz.getEduListByMember(memberVO);
-		for (EducationVO educationVO : eduListByMember) {
-			if(educationVO.getEducationTitle().equals(title)){
-				location = educationVO.getEducationLocation();
-			}
-		}
-		AjaxUtil.sendResponse(response, location);
-		return;
-	}
-
-=======
 	@Override
 	public void checkRegistState(String id, HttpServletResponse response) {
 		String message = "OK";
@@ -1013,6 +1021,60 @@ public class MemberServiceImpl implements MemberService {
 		}
 		AjaxUtil.sendResponse(response, message);
 	}
+
+	@Override
+	public ModelAndView getMyEduCourseInfo(HttpSession session) {
+		ModelAndView view = new ModelAndView();
+		view.setViewName("member/myEduCourseInfo");
+		return view;
+	}
+
+	@Override
+	public void updateLeaveClass(HttpServletResponse response, HttpSession session) {
+		
+		String message = "NO";
+		
+		MemberVO memberVO = (MemberVO) session.getAttribute(Session.MEMBER);
+		String memberId = memberVO.getId();
+		
+		boolean updateLeaveClassSuccess = memberBiz.updateLeaveClass(memberId);
+		if(updateLeaveClassSuccess) { 
+			message = "OK";
+		}
+		AjaxUtil.sendResponse(response, message);
+		
+		//TODO 중복 클릭 처리
+		//TODO 출결이력 업데이트
+		
+	}
+
+	@Override
+	public ModelAndView getAllAttendHistory(HttpSession session, String educationId, int pageNo) {
+		
+		MemberVO memberVO = (MemberVO) session.getAttribute(Session.MEMBER);
+		Map<String, String> eduIdAndMemberId = new HashMap<String, String>();
+
+		eduIdAndMemberId.put("educationId", educationId);
+		eduIdAndMemberId.put("memberId", memberVO.getId());
+		EducationVO eduInfo = memberBiz.getOneEducationInfo(eduIdAndMemberId);
+		
+		Paging paging = new Paging();
+		paging.setPageNumber(pageNo+"");
+		
+		Map<String, List<String>> attends = memberBiz.getAllAttendHistory(memberVO, educationId, paging);
+		
+		AttendListVO attendList = new AttendListVO();
+		attendList.setAttends(attends);
+		attendList.setPaging(paging);
+		
+		
+		ModelAndView view = new ModelAndView();
+		view.addObject("eduInfo", eduInfo);
+		view.addObject("attendList", attendList);
+		view.setViewName("member/attendHistoryDetail");
+		
+		return view;
+	}
 	
->>>>>>> .r1600
+	
 }

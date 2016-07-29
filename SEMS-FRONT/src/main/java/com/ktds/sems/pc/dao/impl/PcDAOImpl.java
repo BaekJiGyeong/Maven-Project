@@ -32,12 +32,12 @@ public class PcDAOImpl extends SqlSessionDaoSupport implements PcDAO {
 	public int getNextReportedPcIdSeq() {
 		return getSqlSession().selectOne("PcDAO.getNextReportedPcIdSeq");
 	}
-		
-	@Override	
+	
+	@Override
 	public String getNowDate() {
 		return getSqlSession().selectOne("PcDAO.getNowDate");
 	}
-	
+
 	@Override
 	public List<UsedPcVO> getUsedPcListByMember(MemberVO memberVO) {
 		return getSqlSession().selectList("PcDAO.getUsedPcListByMember", memberVO);

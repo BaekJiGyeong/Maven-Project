@@ -164,6 +164,8 @@ public interface MemberDAO {
 	public int currentLoginHistorySeq();
 
 	public List<EducationVO> getPreCourseList(EducationSearchVO educationSearchVO);
+
+	public int checkAttend(String id);
 	
 
 }

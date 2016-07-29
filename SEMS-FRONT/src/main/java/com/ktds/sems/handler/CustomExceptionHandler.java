@@ -13,6 +13,8 @@ public class CustomExceptionHandler {
 	//{}은 배열이라는 뜻 여러개 적을려면 {, }일케함 됌
 	@ExceptionHandler({RuntimeException.class})
 	public ModelAndView runtimeExceptionHandler(RuntimeException re, HttpServletRequest request) {
+		
+		re.printStackTrace();
 		ModelAndView view = new ModelAndView();
 		view.setViewName("error/500");
 		view.addObject("message",re.getMessage());	

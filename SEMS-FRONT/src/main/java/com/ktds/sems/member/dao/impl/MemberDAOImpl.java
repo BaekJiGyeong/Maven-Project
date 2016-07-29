@@ -371,7 +371,8 @@ public class MemberDAOImpl extends SqlSessionDaoSupport implements MemberDAO {
 
 	@Override
 	public int updateLeaveClass(AttendVO attendVO) {
-		return getSqlSession().update("MemberDAO.updateLeaveClass", attendVO);
+		String memberId = attendVO.getMemberId();
+		return getSqlSession().update("MemberDAO.updateLeaveClass", memberId);
 	}
 
 	@Override
@@ -402,5 +403,10 @@ public class MemberDAOImpl extends SqlSessionDaoSupport implements MemberDAO {
 	@Override
 	public List<EducationVO> getPreCourseList(EducationSearchVO educationSearchVO) {
 		return getSqlSession().selectList("MemberDAO.getPreCourseList", educationSearchVO);
+	}
+
+	@Override
+	public int checkAttend(String id) {
+		return getSqlSession().selectOne("MemberDAO.checkAttend", id);
 	}
 }

@@ -644,6 +644,13 @@
 		WHERE	RNUM <![CDATA[>=]]> #{startIndex}
 		AND     RNUM <![CDATA[<=]]> #{endIndex}
 		AND		EI.EDU_ID = EH.EDU_ID
+		<if test="searchKeyword != null and searchKeyword != ''">
+		AND		EI.EDU_TTL LIKE '%'|| #{searchKeyword} ||'%'
+		</if>
+		<if test="searchStartDate != null and searchStartDate != ''">
+		AND		EI.SRT_DATE <![CDATA[>=]]> TO_DATE(#{searchStartDate}, 'YYYY-MM-DD')	
+		AND		EI.END_DATE <![CDATA[<=]]> TO_DATE(#{searchEndDate}, 'YYYY-MM-DD') + 1	
+		</if>
 		AND		EI.END_DATE <![CDATA[<]]> TO_CHAR(SYSDATE, 'YYYY-MM-DD')
 		ORDER BY EI.EDU_ID DESC
 	</select>
@@ -833,20 +840,19 @@
  		AND     EI.END_TM >= TO_CHAR(SYSDATE, 'HH24:MI')
 	</select>
 	
-	<update id="updateLeaveClass" parameterType="AttendVO">
+	<update id="updateLeaveClass" parameterType="string">
 		UPDATE ATD
 		SET    LEAV_TM = TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI')
-		WHERE  MBR_ID  = #{memberId}
+		WHERE  MBR_ID = #{memberId}
 		AND    TO_CHAR(SYSDATE, 'YYYY-MM-DD') = SUBSTR(ATD_TM, 1, 10)
-		AND    TO_CHAR(SYSDATE, 'HH24:MI') <![CDATA[<=]]> (
-					                                        SELECT END_TM
-					                                        FROM   EDU_INFO
-					                                        WHERE  EDU_ID = #{educationId}
-					                                   	  )   
 	</update>
 	
 	<select id="getNowClassInfoById" resultType="AttendVO" parameterType="string">
-		SELECT	A.* 
+		SELECT	A.ID id
+				, A.MBR_ID memberId
+				, A.ATD_TM attendTime
+				, A.EDU_ID leaveTime
+				, A.LEAV_TM educationId
 		FROM    ATD A, EDU_INFO E
 		WHERE   A.EDU_ID = E.EDU_ID
 		AND     A.MBR_ID = #{memberId}
@@ -923,4 +929,25 @@
 		FROM    DUAL
 	</select>
 	
+	<select id="checkAttend" parameterType="string" resultType="_int">
+		SELECT	COUNT(*)
+		FROM	ATD
+		WHERE	MBR_ID={#id}
+		AND		EDU_ID = (
+						SELECT EDU_ID
+							FROM(
+								SELECT  *
+								FROM	(
+								SELECT	EDU_ID
+										, TO_DATE(STR_DATE || ' ' || START_TM, 'YYYY-MM-DD HH24:MI') START_DATETIME
+										, TO_DATE(STR_DATE || ' ' || END_TM, 'YYYY-MM-DD HH24:MI') END_DATETIME
+								FROM	EDU_INFO
+										) EDU_INFO
+								WHERE	END_DATETIME >=SYSDATE
+								AND		START_DATETIME <![CDATA[<=]]> SYSDATE + (1/24)
+								ORDER	BY START_DATE_TIME 
+							)
+						WHERE ROWNUM=1
+					)
+	</select>	
 </mapper>

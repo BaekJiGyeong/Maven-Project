@@ -680,7 +680,7 @@
 				, B.TITLE title
 				, B.CONTENTS contents
 				, TO_CHAR(B.CREATE_DATE, 'YYYY-MM-DD') createDate
-				, B.MODIFY_DATE modifyDate
+				, TO_CHAR(B.MODIFY_DATE, 'YYYY-MM-DD') modifyDate
 				, B.HITS hits
 		FROM	(
 					SELECT	ROWNUM AS RNUM
@@ -689,12 +689,30 @@
 								SELECT	*
 								FROM	EDU_FILE_BBS
 								WHERE	EDU_ID = #{educationId}
-								<if test="searchKeyword != null and searchType != null">
-								AND		(
-											<if test="searchType == 'memberId'">
-												MBR_ID LIKE '%' || #{searchKeyword} || '%'
-											</if>
-										)
+								AND		IS_DELETE = 'N'
+								<if test="searchType != null and searchType != ''">
+									<if test="searchType == 'title'">
+										AND TITLE LIKE '%' || #{searchKeyword} || '%'
+									</if>
+									<if test="searchType == 'contents'">
+										AND CONTENTS LIKE '%' || #{searchKeyword} || '%'
+									</if>
+									<if test="searchType == 'date'">
+										<if test="startDate != null and startDate != ''">
+											AND CREATE_DATE >= #{startDate}
+										</if>
+										<if test="endDate != null and endDate != ''">
+											AND CREATE_DATE <![CDATA[<]]> TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+										</if>
+									</if>
+									<if test="searchType == 'date'">
+										<if test="startDate != null and startDate != ''">
+											AND CREATE_DATE >= #{startDate}
+										</if>
+										<if test="endDate != null and endDate != ''">
+											AND CREATE_DATE <![CDATA[<]]> TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+										</if>
+									</if>
 								</if>
 								ORDER	BY ATC_ID DESC
 							) BBS
@@ -1251,10 +1269,32 @@
 		FROM	DUAL
 	</select>
 	
-	<select id="getEducationFileBBSCount" parameterType="string" resultType="_int">
+	<select id="getEducationFileBBSCount" parameterType="FileBBSSearchVO" resultType="_int">
 		SELECT	COUNT(ATC_ID)
 		FROM	EDU_FILE_BBS
 		WHERE	EDU_ID = #{educationId}
+		<if test="searchType == 'title'">
+			AND TITLE LIKE '%' || #{searchKeyword} || '%'
+		</if>
+		<if test="searchType == 'contents'">
+			AND CONTENTS LIKE '%' || #{searchKeyword} || '%'
+		</if>
+		<if test="searchType == 'date'">
+			<if test="startDate != null and startDate != ''">
+				AND CREATE_DATE >= #{startDate}
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND CREATE_DATE <![CDATA[<]]> TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+			</if>
+		</if>
+		<if test="searchType == 'date'">
+			<if test="startDate != null and startDate != ''">
+				AND CREATE_DATE >= #{startDate}
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND CREATE_DATE <![CDATA[<]]> TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+			</if>
+		</if>
 	</select>
 	
 	<select id="getOneEducationFileBBS" resultType="EducationFileBBSVO" parameterType="string">
@@ -1271,10 +1311,11 @@
 		WHERE	ATC_ID = #{articleId}
 	</select>
 	
-	<select id="isExistedHitMemberIdByArtileId" resultType="string" parameterType="string">
+	<select id="isExistedHitMemberIdByArtileId" resultType="string" parameterType="BBSHistoryVO">
 		SELECT	MBR_ID memberId
 		FROM	BBS_HTR
-		WHERE	BBS_ID = #{articleId}
+		WHERE	BBS_ID = #{bbsId}
+		AND		MBR_ID = #{memberId}
 	</select>
 	
 	<select id="getTotalEducationQNACount" parameterType="EducationQNABBSSearchVO" resultType="_int">
@@ -1379,6 +1420,12 @@
 		DELETE
 		FROM	EDU_RPT_BBS
 		WHERE	ATC_ID	= #{articleId}
+	</delete>
+	
+	<delete id="deleteEducationHistoryByMemberId" parameterType="string">
+		DELETE
+		FROM	EDU_HTR
+		WHERE	MBR_ID	= #{memberId}
 	</delete>
 	
 	<select id="reportCheckEndDate" parameterType="string" resultType="string">
@@ -1598,6 +1645,89 @@
 		AND		ATC_ID LIKE 'EQ%'
 	</select>
 	
+	<insert id="writeFileBBSReply" parameterType="BBSReplyVO">
+		INSERT	INTO BBS_RPL	(
+									REPLY_ID
+									, ATC_ID
+									, PARENT_REPLY_ID
+									, ORDER_NO
+									, DESCRIPTION
+									, MBR_ID
+									, LIKE_CNT
+									, DISLIKE_CNT
+									, CREATED_DATE
+								) 
+		VALUES					(
+									#{replyId}
+									, #{articleId}
+									<if test="parentReplyId != null">
+									, #{parentReplyId}
+									</if>
+									<if test="parentReplyId == null">
+									, '0'
+									</if>
+									, #{orderNo}
+									, #{description}
+									, #{memberId}
+									, '0'
+									, '0'
+									, SYSDATE
+								)
+	</insert>
+	
+	<select id="getAllBBSReplyByArticle" resultType="BBSReplyVO" parameterType="BBSReplySearchVO">
+		SELECT	R.REPLY_ID replyId
+				, R.ATC_ID articleId
+				, R.PARENT_REPLY_ID parentReplyId
+				, R.ORDER_NO orderNo
+				, R.DESCRIPTION description
+				, R.MBR_ID memberId
+				, R.LIKE_CNT likeCount
+				, R.DISLIKE_CNT dislikeCount
+				, R.CREATED_DATE createdDate
+		FROM	(
+					SELECT	ROWNUM AS RNUM
+							, RP.*
+					FROM	(
+								SELECT	*
+								FROM	BBS_RPL
+								WHERE	ATC_ID = #{articleId}
+								START	WITH PARENT_REPLY_ID = '0'
+								CONNECT	BY PRIOR REPLY_ID = PARENT_REPLY_ID
+							) RP
+					WHERE	ROWNUM <![CDATA[<=]]> #{endIndex}
+				) R
+		WHERE	RNUM >= #{startIndex}
+	</select>
+	
+	<select id="getTotalFileBBSReplyCountByArticleId" parameterType="string" resultType="_int">
+		SELECT	COUNT(REPLY_ID)
+		FROM	BBS_RPL
+		WHERE	ATC_ID = #{articleId}
+	</select>
+	
+	<select id="getNextOrderNo" parameterType="string" resultType="_int">
+		SELECT	(MAX(ORDER_NO) + 1) orderNo
+		FROM	BBS_RPL
+		WHERE	REPLY_ID = #{parentReplyId}
+		OR		PARENT_REPLY_ID = #{parentReplyId}
+	</select>
+	
+	<update id="deleteFileBBSByArticleId" parameterType="string">
+		UPDATE	EDU_FILE_BBS
+		SET		IS_DELETE = 'Y'
+		WHERE	ATC_ID = #{articleId}
+	</update>
+	
+	<update id="modifyFileBBS" parameterType="EducationFileBBSVO">
+		UPDATE	EDU_FILE_BBS
+		SET		TITLE = #{title}
+				, CONTENTS = #{contents}
+				, MODIFY_DATE = SYSDATE
+		WHERE	ATC_ID = #{articleId}
+		AND		MBR_ID = #{memberId}
+	</update>
+	
 	<insert id="insertEduBBSAccess" parameterType="EducationBoardHistoryVO">
 		INSERT INTO SEMS.EDU_BRD_HTR (
   										 EDU_BRD_HTR_ID
@@ -1657,4 +1787,56 @@
 									, 'EDU_RE_A'
 							 	)
    	</insert>
+   	
+   	<select id="getAllEduFileNotice" parameterType="EduNoticeSearchVO" resultType="EduNoticeVO">
+		SELECT	IMP_ATC_ID eduNoticeId
+				, EDU_ID educationId
+				, MBR_ID memberId
+				, IS_DELETE isDelete
+				, TITLE title
+				, CONTENTS contents
+				, TO_CHAR(CREATE_DATE,'YYYY-MM-DD') createDate
+				, TO_CHAR(MODIFY_DATE,'YYYY-MM-DD') modifyDate
+				, HITS hits
+				, IMP_TP noticeType
+		FROM	IMP_ATC
+		WHERE	IS_DELETE = 'N' 
+		AND     ((EDU_ID =  #{educationId}  AND IMP_TP ='normal') OR IMP_TP ='important')
+		ORDER	BY IMP_ATC_ID
+		
+	</select>
+	
+	<select id="getOneNotice" parameterType="String" resultType="EduNoticeVO" >
+		SELECT	IMP_ATC_ID eduNoticeId
+		        , EDU_ID educationId
+		        , MBR_ID memberId
+		        , IS_DELETE isDelete
+		        , TITLE title
+		        , CONTENTS contents
+		        , CREATE_DATE createDate
+		        , MODIFY_DATE modifyDate
+		        , HITS hits
+		        , IMP_TP noticeType
+		FROM	IMP_ATC
+		WHERE	IMP_ATC_ID =  #{eduNoticeId} 
+		
+	</select>
+	
+	<update id="addhits" parameterType="String">
+		UPDATE	IMP_ATC
+		SET		HITS = HITS +1
+		WHERE	IMP_ATC_ID = #{eduNoticeId} 
+	</update>
+	
+	<select id="getOneEduNoticeId" resultType="string">
+		SELECT  IMP_ATC_ID
+		FROM    IMP_ATC
+		WHERE   ROWNUM=1
+	</select>
+	
+	<select id="getOneEducationId" resultType="string">
+		SELECT  EDU_ID
+		FROM    EDU_INFO
+		WHERE   ROWNUM=1
+	</select>
 </mapper>

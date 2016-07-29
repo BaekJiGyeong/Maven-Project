@@ -11,7 +11,8 @@
 		<mvc:interceptor>
 			<!-- 모든 페이지에서 세션이 끊겨 있으면 root로 이동 -->
 			<mvc:mapping path="/**" />
-			<mvc:exclude-mapping path="/" />
+			<mvc:exclude-mapping path="/m/**"/>
+			<mvc:exclude-mapping path="/**" />
 			<mvc:exclude-mapping path="/loginPage" />
 			<mvc:exclude-mapping path="/login" />
 			<mvc:exclude-mapping path="/checkRegistState" />
@@ -91,6 +92,10 @@
 
 	<bean id="pcController" class="com.ktds.sems.pc.web.PcController">
 		<property name="pcService" ref="pcService" />
+	</bean>
+	
+	<bean id="mobileMemberController" class="com.ktds.sems.mobile.web.MemberController">
+		<property name="memberService" ref="memberService" />
 	</bean>
 
 </beans>
